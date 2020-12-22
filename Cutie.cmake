@@ -68,6 +68,8 @@ set(TEST_TARGETS)
 #   COMPILER_FLAGS followed by a list of compile time flags
 #   COMPILER_DEFINITIONS followed by a list of definitions for the compiler
 #   LINKER_FLAGS followed by a list of link time flags
+#   INCLUDE_DIRECTORIES followed by a list of additional include directories
+#   LINK_LIBRARIES followed by a list of additional link libraries
 #
 #   TODO improve example
 # Example:
@@ -76,10 +78,10 @@ function(add_cutie_test_target)
     ## Dependencies directories
     set(GOOGLETEST_DIR ${CUTIE_DIR}/googletest)
     set(SUBHOOK_DIR ${CUTIE_DIR}/subhook)
-    set(CMOCK_DIR ${CUTIE_DIR}/C-Mock)
+    set(C_MOCK_DIR ${CUTIE_DIR}/C-Mock)
 
     # Parse arguments
-    cmake_parse_arguments(PARSE_ARGV 0 TEST "" "TEST" "SOURCES;COMPILER_FLAGS;COMPILER_DEFINITIONS;LINKER_FLAGS")
+    cmake_parse_arguments(PARSE_ARGV 0 TEST "" "TEST" "SOURCES;COMPILER_FLAGS;COMPILER_DEFINITIONS;LINKER_FLAGS;INCLUDE_DIRECTORIES;LINK_LIBRARIES")
     get_filename_component(TEST_NAME ${TEST_TEST} NAME_WE)
 
     # Define test target
@@ -104,33 +106,35 @@ function(add_cutie_test_target)
             ${CUTIE_DIR}
             ${GOOGLETEST_DIR}/googlemock/include
             ${GOOGLETEST_DIR}/googletest/include
-            ${CMOCK_DIR}/include
+            ${C_MOCK_DIR}/include
             ${SUBHOOK_DIR}
+            ${TEST_INCLUDE_DIRECTORIES}
     )
 
     # set build options
     target_compile_options(${TEST_NAME}
         PRIVATE
-            ${COMPILER_FLAGS}
+            ${TEST_COMPILER_FLAGS}
             ${COVERAGE_FLAGS}
     )
 
     target_compile_definitions(${TEST_NAME}
         PRIVATE
-            ${COMPILER_DEFINITIONS}
+            ${TEST_COMPILER_DEFINITIONS}
     )
 
     target_link_libraries(${TEST_NAME}
         PUBLIC
             gmock_main
             subhook
+            ${TEST_LINK_LIBRARIES}
     )
-    
+
     target_link_options(${TEST_NAME}
         PRIVATE
             ${C_MOCK_LINKER_FLAGS}
             ${COVERAGE_FLAGS}
-            ${LINKER_FLAGS}
+            ${TEST_LINKER_FLAGS}
     )
 
     set(TEST_TARGETS ${TEST_TARGETS} ${TEST_NAME} PARENT_SCOPE)
