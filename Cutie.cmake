@@ -73,7 +73,7 @@ function(add_cutie_test_target)
 
     ## Compiler & Linker flags
     set(COVERAGE_FLAGS -fprofile-arcs -ftest-coverage --coverage)
-    set(CMOCK_LINKER_FLAGS "-rdynamic -Wl,--no-as-needed -ldl")
+    set(CMOCK_LINKER_FLAGS -rdynamic -Wl,--no-as-needed -ldl)
 
     ## Compiling dependencies
     if (NOT DEFINED _CUTIE_DEPENDENCIES_COMPILED)
