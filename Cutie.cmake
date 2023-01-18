@@ -40,20 +40,6 @@ cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 17)
 include(CTest)
 
-
-if (WIN32)
-  option(USE_DLFCN_WIN32_PACKAGE "Use dlfcn-win32 system package (if false dlfcn is build from source)" FALSE)
-  if(${USE_DLFCN_WIN32_PACKAGE})
-    #MSYS2 case (dlfcn package can be installed)
-    find_package(dlfcn-win32 REQUIRED)
-    set(CMAKE_DL_LIBS dlfcn-win32::dl)
-    set(BUILD_DLFCN FALSE)
-  else()
-    set(CMAKE_DL_LIBS dl)
-    set(BUILD_DLFCN TRUE)
-  endif()
-endif ()
-
 ## Functions
 function(verify_variable variable_name)
     if (NOT DEFINED ${variable_name})
@@ -66,6 +52,20 @@ verify_variable(CUTIE_DIR)
 get_property(languages GLOBAL PROPERTY ENABLED_LANGUAGES)
 if (NOT "CXX" IN_LIST languages)
     message(FATAL_ERROR "Project must be defined with language CXX")
+endif ()
+
+# dlfcn-win32 Support
+if (WIN32)
+  option(USE_DLFCN_WIN32_PACKAGE "Use dlfcn-win32 system package (if false dlfcn is build from source)" FALSE)
+  if(${USE_DLFCN_WIN32_PACKAGE})
+    #MSYS2 case (dlfcn package can be installed)
+    find_package(dlfcn-win32 REQUIRED)
+    set(CMAKE_DL_LIBS dlfcn-win32::dl)
+    set(BUILD_DLFCN FALSE)
+  else()
+    set(CMAKE_DL_LIBS dl)
+    set(BUILD_DLFCN TRUE)
+  endif()
 endif ()
 
 ## Global Variables
