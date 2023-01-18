@@ -42,7 +42,7 @@ Afterwards, the developers at Google decided that the two frameworks should be u
 
 # Getting Started with Cutie
 
-For a sample repository that uses Cutie for unit tests, refer to [datastructures-algorithms](https://github.com/mrdor44/datastructures-algorithms).
+For a demo repository that uses Cutie for unit tests, refer to [Cutie_demo](https://github.com/nboutin/Cutie_demo).
 
 ## Include Cutie in your project
 
