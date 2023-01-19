@@ -97,7 +97,7 @@ function(add_cutie_test_target)
     if(WIN32)
     set(CMOCK_LINKER_FLAGS "-Wl,--export-all-symbols,--no-as-needed -O0")
     else()
-    set(CMOCK_LINKER_FLAGS "-rdynamic -Wl,--no-as-needed -ldl")
+    set(CMOCK_LINKER_FLAGS -rdynamic -Wl,--no-as-needed -ldl)
     endif()
 
     ## Compiling dependencies
