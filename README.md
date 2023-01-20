@@ -32,6 +32,12 @@ Cutie's main feature, and the reason why it was created, was to support **Google
 
 To set mocks on C functions, refer to the [`mock.hpp`](mock.hpp), which contains both the documentation and the implementation. Cutie's mocks enable setting GoogleMock expectations on the mocks. For the full capabilities of GoogleMock, refer to the [GoogleMock Documentation](https://google.github.io/googletest/gmock_cook_book.html) and [GoogleMock For Dummies](https://google.github.io/googletest/gmock_for_dummies.html).
 
+## Limitations
+
+### Windows
+- lcov is not working
+- Only works with [MinGW x86_64-8.1.0-release-posix-seh-rt_v6-rev0](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-posix/seh/)
+
 ## GoogleMock or GoogleTest?
 
 So what's the difference between GoogleMock and GoogleTest?
