@@ -24,8 +24,8 @@ namespace cutie {
 
     class CScopedHookInstall {
     private:
-        subhook_t* m_hook;
         void* m_src;
+        subhook_t* m_hook;
 
     public:
         CScopedHookInstall(subhook_t* hook, void* src, void* dst)
