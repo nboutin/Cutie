@@ -209,7 +209,7 @@ function(setup_target_for_coverage_lcov)
     endif() # NOT GENHTML_PATH
 
     # Set base directory (as absolute path), or default to PROJECT_SOURCE_DIR
-    if(${Coverage_BASE_DIRECTORY})
+    if(DEFINED Coverage_BASE_DIRECTORY)
         get_filename_component(BASEDIR ${Coverage_BASE_DIRECTORY} ABSOLUTE)
     else()
         set(BASEDIR ${PROJECT_SOURCE_DIR})
@@ -305,7 +305,7 @@ function(setup_target_for_coverage_gcovr_xml)
     endif() # NOT GCOVR_PATH
 
     # Set base directory (as absolute path), or default to PROJECT_SOURCE_DIR
-    if(${Coverage_BASE_DIRECTORY})
+    if(DEFINED Coverage_BASE_DIRECTORY)
         get_filename_component(BASEDIR ${Coverage_BASE_DIRECTORY} ABSOLUTE)
     else()
         set(BASEDIR ${PROJECT_SOURCE_DIR})
@@ -377,7 +377,7 @@ function(setup_target_for_coverage_gcovr_html)
     endif() # NOT GCOVR_PATH
 
     # Set base directory (as absolute path), or default to PROJECT_SOURCE_DIR
-    if(${Coverage_BASE_DIRECTORY})
+    if(DEFINED Coverage_BASE_DIRECTORY)
         get_filename_component(BASEDIR ${Coverage_BASE_DIRECTORY} ABSOLUTE)
     else()
         set(BASEDIR ${PROJECT_SOURCE_DIR})
@@ -400,7 +400,8 @@ function(setup_target_for_coverage_gcovr_html)
         list(APPEND GCOVR_EXCLUDE_ARGS "${EXCLUDE}")
     endforeach()
 
-    add_custom_target(${Coverage_NAME}
+    # adding _target suffix to avoid cycling targets loop with Ninja build
+    add_custom_target("${Coverage_NAME}_target"
         # Run tests
         ${Coverage_EXECUTABLE} ${Coverage_EXECUTABLE_ARGS}
 
@@ -421,7 +422,7 @@ function(setup_target_for_coverage_gcovr_html)
     )
 
     # Show info where to find the report
-    add_custom_command(TARGET ${Coverage_NAME} POST_BUILD
+    add_custom_command(TARGET "${Coverage_NAME}_target" POST_BUILD
         COMMAND ;
         COMMENT "Open ./${Coverage_NAME}/index.html in your browser to view the coverage report."
     )

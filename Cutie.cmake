@@ -74,20 +74,20 @@ set(TEST_TARGETS)
 
 ## Functions
 
-# Define a new target to run a single test file.
+# Define a new target to run a test executable
 #
 # Usage:
-#   add_cutie_test_target(TEST test [SOURCES sources...] [COMPILER_FLAGS compile_flags...] [COMPILER_DEFINITIONS compile_defs...] [LINKER_FLAGS link_flags...])
-#   TEST followed by the test source file
-#   SOURCES followed by additional (optional) source files list required for the test
-#   COMPILER_FLAGS followed by a list of compile time flags
-#   COMPILER_DEFINITIONS followed by a list of definitions for the compiler
-#   LINKER_FLAGS followed by a list of link time flags
-#   INCLUDE_DIRECTORIES followed by a list of additional include directories
-#   LINK_LIBRARIES followed by a list of additional link libraries
-#
-#   TODO improve example
+#   add_cutie_test_target(
+#     TEST test (test source file)
+#     [SOURCES sources...] ((optional) source files list required for the test)
+#     [COMPILER_FLAGS compile_flags...] ((optional) compile time flags list)
+#     [COMPILER_DEFINITIONS compile_defs...] ((optional) definitions for the compiler list)
+#     [LINKER_FLAGS link_flags...] ((optional) link time flags list)
+#     [INCLUDE_DIRECTORIES include_dirs...] ((optional) additional include directories list)
+#     [LINK_LIBRARIES link_libs...] ((optional) additional link libraries list)
+#   )
 # Example:
+#     add_cutie_test_target(TEST test/a.cpp)
 #     add_cutie_test_target(TEST test/a.cpp SOURCES src/a.c src/b.c)
 function(add_cutie_test_target)
     # Parse arguments
@@ -161,6 +161,7 @@ function(add_cutie_test_target)
         PUBLIC
             gmock_main
             subhook
+	    ${CMAKE_DL_LIBS}
             ${TEST_LINK_LIBRARIES}
     )
 

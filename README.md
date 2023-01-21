@@ -12,25 +12,31 @@ As said before, Cutie integrates several UT frameworks and libraries and provide
 
 ### Full Unit Testing Framework
 
-Cutie employs **GoogleTest** to provide a full unit testing framework, including test definitions, a built in runner, assertions, etc. For the full specification of what's provided in GoogleTest, refer to the full [GoogleTest Documentation](googletest/README.md).
+Cutie employs **GoogleTest** to provide a full unit testing framework, including test definitions, a built in runner, assertions, etc. For the full specification of what's provided in GoogleTest, refer to the full [GoogleTest Documentation](https://github.com/google/googletest/blob/main/README.md).
 
 Some of the interesting documentation pages are:
 
-- [Primer](googletest/googletest/docs/primer.md): Details basic concepts, assertions and writing simple tests.
-- [Advanced](googletest/googletest/docs/advanced.md): Explicit Success and Failure, Predicate Assertions for Better Error Messages, Floating Point Comparison, Death Tests, Using Assertions in Sub-Routines, Propagating Fatal Failures, Logging Additional Information, Sharing Resources Between Tests in the Same Test Case, Global Set-Up and Tear-Down, Value Parameterized Tests, Testing Private Code, Getting the Current Test's Name, Running Test Programs: Advanced Options.
-- [FAQ](googletest/googletest/docs/faq.md): Contains many interesting entries.
+- [Primer](https://google.github.io/googletest/primer.html): Details basic concepts, assertions and writing simple tests.
+- [Advanced](https://google.github.io/googletest/advanced.html): Explicit Success and Failure, Predicate Assertions for Better Error Messages, Floating Point Comparison, Death Tests, Using Assertions in Sub-Routines, Propagating Fatal Failures, Logging Additional Information, Sharing Resources Between Tests in the Same Test Case, Global Set-Up and Tear-Down, Value Parameterized Tests, Testing Private Code, Getting the Current Test's Name, Running Test Programs: Advanced Options.
+- [FAQ](https://google.github.io/googletest/faq.html): Contains many interesting entries.
 
 ### Hooks
 
 **Subhook** is a library for setting and managing hooks on C functions. Cutie employs Subhook to stub C functions, and later, using CMock, mocking them using GoogleMock.
 
-To set hooks using Subhook alone, you can check out the [Subhook Documentation](subhook/README.md). However, we recommend using Cutie's `hook.hpp` header file to set hooks. The documentation is within [`hook.hpp`](hook.hpp) itself.
+To set hooks using Subhook alone, you can check out the [Subhook Documentation](https://github.com/Zeex/subhook/blob/master/README.md). However, we recommend using Cutie's `hook.hpp` header file to set hooks. The documentation is within [`hook.hpp`](hook.hpp) itself.
 
 ### Mocks
 
 Cutie's main feature, and the reason why it was created, was to support **GoogleMock** mocks on C functions. Cutie implements this using the CMock library.
 
-To set mocks on C functions, refer to the [`mock.hpp`](mock.hpp), which contains both the documentation and the implementation. Cutie's mocks enable setting GoogleMock expectations on the mocks. For the full capabilities of GoogleMock, refer to the [GoogleMock Documentation](googletest/googlemock/README.md) and [GoogleMock For Dummies](googletest/googlemock/docs/for_dummies.md).
+To set mocks on C functions, refer to the [`mock.hpp`](mock.hpp), which contains both the documentation and the implementation. Cutie's mocks enable setting GoogleMock expectations on the mocks. For the full capabilities of GoogleMock, refer to the [GoogleMock Documentation](https://google.github.io/googletest/gmock_cook_book.html) and [GoogleMock For Dummies](https://google.github.io/googletest/gmock_for_dummies.html).
+
+## Limitations
+
+### Windows
+- lcov is not working
+- Only works with [MinGW x86_64-8.1.0-release-posix-seh-rt_v6-rev0](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-posix/seh/)
 
 ## GoogleMock or GoogleTest?
 
@@ -42,7 +48,7 @@ Afterwards, the developers at Google decided that the two frameworks should be u
 
 # Getting Started with Cutie
 
-For a sample repository that uses Cutie for unit tests, refer to [datastructures-algorithms](https://github.com/mrdor44/datastructures-algorithms).
+For a demo repository that uses Cutie for unit tests, refer to [Cutie_demo](https://github.com/nboutin/Cutie_demo).
 
 ## Include Cutie in your project
 

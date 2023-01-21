@@ -7,3 +7,6 @@
 [submodule "C-Mock"]
 	path = C-Mock
 	url = https://github.com/hjagodzinski/C-Mock.git
+[submodule "dlfcn-win32"]
+	path = dlfcn-win32
+	url = https://github.com/dlfcn-win32/dlfcn-win32
