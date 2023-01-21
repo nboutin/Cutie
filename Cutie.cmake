@@ -72,35 +72,56 @@ endif ()
 ## Global Variables
 set(TEST_TARGETS)
 
-# Defines a new target to run a single test file
-# Usage:
-#     add_cutie_test_target(TEST test [SOURCES sources...])
-#     'test' is the test file that should be executed
-#     'sources' is an optional list of source files that are required for the test
+## Functions
+
+# Define a new target to run a test executable
 #
+# Usage:
+#   add_cutie_test_target(
+#     TEST test (test source file)
+#     [SOURCES sources...] ((optional) source files list required for the test)
+#     [COMPILER_FLAGS compile_flags...] ((optional) compile time flags list)
+#     [COMPILER_DEFINITIONS compile_defs...] ((optional) definitions for the compiler list)
+#     [LINKER_FLAGS link_flags...] ((optional) link time flags list)
+#     [INCLUDE_DIRECTORIES include_dirs...] ((optional) additional include directories list)
+#     [LINK_LIBRARIES link_libs...] ((optional) additional link libraries list)
+#   )
 # Example:
+#     add_cutie_test_target(TEST test/a.cpp)
 #     add_cutie_test_target(TEST test/a.cpp SOURCES src/a.c src/b.c)
 function(add_cutie_test_target)
+    # Parse arguments
+    set(options "")
+    set(one_value_keywords "TEST")
+    set(multi_value_keywords "SOURCES;COMPILER_FLAGS;COMPILER_DEFINITIONS;LINKER_FLAGS;INCLUDE_DIRECTORIES;LINK_LIBRARIES")
+    # - start parsing at 0
+    # - prefix = TEST
+    cmake_parse_arguments(PARSE_ARGV 0 TEST "${options}" "${one_value_keywords}" "${multi_value_keywords}")
+    get_filename_component(TEST_NAME ${TEST_TEST} NAME_WE)
+
     ## Dependencies directories
     set(GOOGLETEST_DIR ${CUTIE_DIR}/googletest)
     set(SUBHOOK_DIR ${CUTIE_DIR}/subhook)
-    set(CMOCK_DIR ${CUTIE_DIR}/C-Mock)
+    set(C_MOCK_DIR ${CUTIE_DIR}/C-Mock)
     if(${BUILD_DLFCN})
         set(DLFCN_BIN_DIR ${DLFCN_DIR}/build)
     endif()
     set(GOOGLETEST_BIN_DIR ${GOOGLETEST_DIR}/build)
     set(SUBHOOK_BIN_DIR ${SUBHOOK_DIR}/build)
 
-    ## Compiler & Linker flags
+    # Define test target
+    add_executable(${TEST_NAME} ${TEST_TEST} ${TEST_SOURCES})
+
+    # Compiler & Linker flags
     set(COVERAGE_FLAGS -fprofile-arcs -ftest-coverage --coverage)
 
     if(WIN32)
-      set(CMOCK_LINKER_FLAGS -Wl,--export-all-symbols,--no-as-needed -O0)
+      set(C_MOCK_LINKER_FLAGS -Wl,--export-all-symbols,--no-as-needed -O0)
     else()
-      set(CMOCK_LINKER_FLAGS -rdynamic -Wl,--no-as-needed -ldl)
+      set(C_MOCK_LINKER_FLAGS -rdynamic -Wl,--no-as-needed -ldl)
     endif()
 
-    ## Compiling dependencies
+    # Compiling dependencies
     if (NOT DEFINED _CUTIE_DEPENDENCIES_COMPILED)
         set(INSTALL_GTEST OFF)
         add_subdirectory(${GOOGLETEST_DIR} ${GOOGLETEST_BIN_DIR} EXCLUDE_FROM_ALL)
@@ -113,20 +134,44 @@ function(add_cutie_test_target)
         set(_CUTIE_DEPENDENCIES_COMPILED 1 PARENT_SCOPE)
     endif ()
 
-    ## Define the test target
-    cmake_parse_arguments(PARSE_ARGV 0 TEST "" TEST SOURCES)
-    get_filename_component(TEST_NAME ${TEST_TEST} NAME_WE)
-    add_executable(${TEST_NAME} ${TEST_TEST} ${TEST_SOURCES})
-    target_include_directories(${TEST_NAME} PUBLIC
+    target_include_directories(${TEST_NAME}
+        PUBLIC
             ${CUTIE_DIR}
             ${GOOGLETEST_DIR}/googlemock/include
             ${GOOGLETEST_DIR}/googletest/include
-            ${CMOCK_DIR}/include
+            ${C_MOCK_DIR}/include
             ${SUBHOOK_DIR}
             "$<$<BOOL:${BUILD_DLFCN}>:${DLFCN_DIR}/src>"
-            )
-    target_compile_options(${TEST_NAME} PUBLIC ${COVERAGE_FLAGS})
-    target_link_libraries(${TEST_NAME} ${CMAKE_DL_LIBS} gmock_main subhook ${CMOCK_LINKER_FLAGS} ${COVERAGE_FLAGS})
+            ${TEST_INCLUDE_DIRECTORIES}
+    )
+
+    # set build options
+    target_compile_options(${TEST_NAME}
+        PRIVATE
+            ${TEST_COMPILER_FLAGS}
+            ${COVERAGE_FLAGS}
+    )
+
+    target_compile_definitions(${TEST_NAME}
+        PRIVATE
+            ${TEST_COMPILER_DEFINITIONS}
+    )
+
+    target_link_libraries(${TEST_NAME}
+        PUBLIC
+            gmock_main
+            subhook
+	    ${CMAKE_DL_LIBS}
+            ${TEST_LINK_LIBRARIES}
+    )
+
+    target_link_options(${TEST_NAME}
+        PRIVATE
+            ${C_MOCK_LINKER_FLAGS}
+            ${COVERAGE_FLAGS}
+            ${TEST_LINKER_FLAGS}
+    )
+
     set(TEST_TARGETS ${TEST_TARGETS} ${TEST_NAME} PARENT_SCOPE)
 
     if (DEFINED CUTIE_GTEST_XML)
