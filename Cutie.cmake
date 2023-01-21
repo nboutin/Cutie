@@ -54,6 +54,21 @@ if (NOT "CXX" IN_LIST languages)
     message(FATAL_ERROR "Project must be defined with language CXX")
 endif ()
 
+# dlfcn-win32 Support
+if (WIN32)
+  option(USE_DLFCN_WIN32_PACKAGE "Use dlfcn-win32 system package (if false dlfcn is build from source)" FALSE)
+  if(${USE_DLFCN_WIN32_PACKAGE})
+    #MSYS2 case (dlfcn package can be installed)
+    find_package(dlfcn-win32 REQUIRED)
+    set(CMAKE_DL_LIBS dlfcn-win32::dl)
+    set(BUILD_DLFCN FALSE)
+  else()
+    set(CMAKE_DL_LIBS dl)
+    get_filename_component(DLFCN_DIR ${CUTIE_DIR}/dlfcn-win32 REALPATH)
+    set(BUILD_DLFCN TRUE)
+  endif()
+endif ()
+
 ## Global Variables
 set(TEST_TARGETS)
 
@@ -75,29 +90,47 @@ set(TEST_TARGETS)
 # Example:
 #     add_cutie_test_target(TEST test/a.cpp SOURCES src/a.c src/b.c)
 function(add_cutie_test_target)
+    # Parse arguments
+    set(options "")
+    set(one_value_keywords "TEST")
+    set(multi_value_keywords "SOURCES;COMPILER_FLAGS;COMPILER_DEFINITIONS;LINKER_FLAGS;INCLUDE_DIRECTORIES;LINK_LIBRARIES")
+    # - start parsing at 0
+    # - prefix = TEST
+    cmake_parse_arguments(PARSE_ARGV 0 TEST "${options}" "${one_value_keywords}" "${multi_value_keywords}")
+    get_filename_component(TEST_NAME ${TEST_TEST} NAME_WE)
+
     ## Dependencies directories
     set(GOOGLETEST_DIR ${CUTIE_DIR}/googletest)
     set(SUBHOOK_DIR ${CUTIE_DIR}/subhook)
     set(C_MOCK_DIR ${CUTIE_DIR}/C-Mock)
-
-    # Parse arguments
-    cmake_parse_arguments(PARSE_ARGV 0 TEST "" "TEST" "SOURCES;COMPILER_FLAGS;COMPILER_DEFINITIONS;LINKER_FLAGS;INCLUDE_DIRECTORIES;LINK_LIBRARIES")
-    get_filename_component(TEST_NAME ${TEST_TEST} NAME_WE)
+    if(${BUILD_DLFCN})
+        set(DLFCN_BIN_DIR ${DLFCN_DIR}/build)
+    endif()
+    set(GOOGLETEST_BIN_DIR ${GOOGLETEST_DIR}/build)
+    set(SUBHOOK_BIN_DIR ${SUBHOOK_DIR}/build)
 
     # Define test target
     add_executable(${TEST_NAME} ${TEST_TEST} ${TEST_SOURCES})
 
     # Compiler & Linker flags
     set(COVERAGE_FLAGS -fprofile-arcs -ftest-coverage --coverage)
-    set(C_MOCK_LINKER_FLAGS -rdynamic -Wl,--no-as-needed -ldl)
+
+    if(WIN32)
+      set(C_MOCK_LINKER_FLAGS -Wl,--export-all-symbols,--no-as-needed -O0)
+    else()
+      set(C_MOCK_LINKER_FLAGS -rdynamic -Wl,--no-as-needed -ldl)
+    endif()
 
     # Compiling dependencies
     if (NOT DEFINED _CUTIE_DEPENDENCIES_COMPILED)
         set(INSTALL_GTEST OFF)
-        add_subdirectory(${GOOGLETEST_DIR} EXCLUDE_FROM_ALL)
+        add_subdirectory(${GOOGLETEST_DIR} ${GOOGLETEST_BIN_DIR} EXCLUDE_FROM_ALL)
         set(SUBHOOK_STATIC ON)
         set(SUBHOOK_TESTS OFF)
-        add_subdirectory(${SUBHOOK_DIR} EXCLUDE_FROM_ALL)
+        add_subdirectory(${SUBHOOK_DIR} ${SUBHOOK_BIN_DIR} EXCLUDE_FROM_ALL)
+        if(${BUILD_DLFCN})
+          add_subdirectory(${DLFCN_DIR} ${DLFCN_BIN_DIR} EXCLUDE_FROM_ALL)
+        endif()
         set(_CUTIE_DEPENDENCIES_COMPILED 1 PARENT_SCOPE)
     endif ()
 
@@ -108,6 +141,7 @@ function(add_cutie_test_target)
             ${GOOGLETEST_DIR}/googletest/include
             ${C_MOCK_DIR}/include
             ${SUBHOOK_DIR}
+            "$<$<BOOL:${BUILD_DLFCN}>:${DLFCN_DIR}/src>"
             ${TEST_INCLUDE_DIRECTORIES}
     )
 
@@ -138,7 +172,12 @@ function(add_cutie_test_target)
     )
 
     set(TEST_TARGETS ${TEST_TARGETS} ${TEST_NAME} PARENT_SCOPE)
-    add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+
+    if (DEFINED CUTIE_GTEST_XML)
+      set(TEST_ARGS "--gtest_output=xml:${TEST_NAME}.xml")
+    endif ()
+
+    add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME} ${TEST_ARGS})
 endfunction()
 
 # Defines the `all_tests` target that runs all tests added with add_cutie_test_target()
@@ -164,6 +203,54 @@ function(add_cutie_coverage_targets)
             EXECUTABLE ctest
             EXCLUDE "${CUTIE_DIR}/*" "/usr/include/*")
     add_custom_target(clean_coverage
+            rm --recursive --force ${COVERAGE_DIR}
+            COMMAND find -iname "*.gcda" -delete
+            COMMAND find -iname "*.gcno" -delete
+            WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+            VERBATIM
+            COMMENT "Deleting coverage information. Rebuild after this.")
+endfunction()
+
+
+# Defines the following two targets:
+#   1. `coverage_gcovr_xml` runs all tests and collects coverage in xml format
+#   2. `clean_coverage_gcovr_xml` cleans coverage information
+# The collected coverage report resides in the coverage/ directory under the project's directory.
+# Function has no parameters
+function(add_cutie_coverage_gcovr_targets)
+    include(${CUTIE_DIR}/inc/CodeCoverage.cmake)
+    set(COVERAGE_DIR coverage_gcovr_xml)
+    setup_target_for_coverage_gcovr_xml(
+            NAME ${COVERAGE_DIR}
+	    BASE_DIRECTORY ${BASE_DIRECTORY}
+            EXECUTABLE ctest
+            EXCLUDE "${CUTIE_DIR}/*" "/usr/include/*"
+			)
+    add_custom_target(clean_coverage_gcovr_xml
+            rm --recursive --force ${COVERAGE_DIR}
+            COMMAND find -iname "*.gcda" -delete
+            COMMAND find -iname "*.gcno" -delete
+            WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+            VERBATIM
+            COMMENT "Deleting coverage information. Rebuild after this.")
+endfunction()
+
+
+
+# Defines the following two targets:
+#   1. `coverage_gcovr_html_target` runs all tests and collects coverage in html format
+#   2. `clean_coverage_gcovr_html` cleans coverage information
+# The collected coverage report resides in the coverage/ directory under the project's directory.
+# Function has no parameters
+function(add_cutie_coverage_gcovr_html_targets)
+    include(${CUTIE_DIR}/inc/CodeCoverage.cmake)
+    set(COVERAGE_DIR coverage_gcovr_html)
+    setup_target_for_coverage_gcovr_html(
+            NAME ${COVERAGE_DIR}
+	    BASE_DIRECTORY ${BASE_DIRECTORY}
+            EXECUTABLE ctest
+            EXCLUDE "${CUTIE_DIR}/*" "/usr/include/*")
+    add_custom_target(clean_coverage_gcovr_html
             rm --recursive --force ${COVERAGE_DIR}
             COMMAND find -iname "*.gcda" -delete
             COMMAND find -iname "*.gcno" -delete
