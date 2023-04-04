@@ -78,26 +78,34 @@ set(TEST_TARGETS)
 #
 # Usage:
 #   add_cutie_test_target(
-#     TEST test (test source file)
-#     [SOURCES sources...] ((optional) source files list required for the test)
-#     [COMPILER_FLAGS compile_flags...] ((optional) compile time flags list)
-#     [COMPILER_DEFINITIONS compile_defs...] ((optional) definitions for the compiler list)
-#     [LINKER_FLAGS link_flags...] ((optional) link time flags list)
-#     [INCLUDE_DIRECTORIES include_dirs...] ((optional) additional include directories list)
-#     [LINK_LIBRARIES link_libs...] ((optional) additional link libraries list)
+#     NAME name ((optional) if not specified, the name will be the first test file name)
+#     TEST test files               (test source file)
+#     [SOURCES sources...]          ((optional) source files list required for the test)
+#     [COMPILER_FLAGS flags...]     ((optional) compile time flags list)
+#     [COMPILER_DEFINITIONS defs...]((optional) definitions for the compiler list)
+#     [LINKER_FLAGS link_flags...]  ((optional) link time flags list)
+#     [INCLUDE_DIRECTORIES dirs...] ((optional) additional include directories list)
+#     [LINK_LIBRARIES libs...]      ((optional) additional link libraries list)
 #   )
-# Example:
-#     add_cutie_test_target(TEST test/a.cpp)
+# Examples:
+#     add_cutie_test_target(NAME test_a TEST test/a.cpp)
 #     add_cutie_test_target(TEST test/a.cpp SOURCES src/a.c src/b.c)
 function(add_cutie_test_target)
     # Parse arguments
     set(options "")
-    set(one_value_keywords "TEST")
-    set(multi_value_keywords "SOURCES;COMPILER_FLAGS;COMPILER_DEFINITIONS;LINKER_FLAGS;INCLUDE_DIRECTORIES;LINK_LIBRARIES")
+    set(one_value_keywords "NAME")
+    set(multi_value_keywords "TEST;SOURCES;COMPILER_FLAGS;COMPILER_DEFINITIONS;LINKER_FLAGS;INCLUDE_DIRECTORIES;LINK_LIBRARIES")
     # - start parsing at 0
     # - prefix = TEST
-    cmake_parse_arguments(PARSE_ARGV 0 TEST "${options}" "${one_value_keywords}" "${multi_value_keywords}")
-    get_filename_component(TEST_NAME ${TEST_TEST} NAME_WE)
+    cmake_parse_arguments(PARSE_ARGV 0 ARGS "${options}" "${one_value_keywords}" "${multi_value_keywords}")
+
+    if(ARGS_UNPARSED_ARGUMENTS)
+        message(WARNING "Unknown arguments: ${ARGS_UNPARSED_ARGUMENTS}")
+    endif()
+
+    if(NOT ARGS_NAME)
+      get_filename_component(ARGS_NAME ${ARGS_TEST} NAME_WE)
+    endif()
 
     ## Dependencies directories
     set(GOOGLETEST_DIR ${CUTIE_DIR}/googletest)
@@ -110,7 +118,7 @@ function(add_cutie_test_target)
     set(SUBHOOK_BIN_DIR ${SUBHOOK_DIR}/build)
 
     # Define test target
-    add_executable(${TEST_NAME} ${TEST_TEST} ${TEST_SOURCES})
+    add_executable(${ARGS_NAME} ${ARGS_TEST} ${ARGS_SOURCES})
 
     # Compiler & Linker flags
     set(COVERAGE_FLAGS -fprofile-arcs -ftest-coverage --coverage)
@@ -134,7 +142,7 @@ function(add_cutie_test_target)
         set(_CUTIE_DEPENDENCIES_COMPILED 1 PARENT_SCOPE)
     endif ()
 
-    target_include_directories(${TEST_NAME}
+    target_include_directories(${ARGS_NAME}
         PUBLIC
             ${CUTIE_DIR}
             ${GOOGLETEST_DIR}/googlemock/include
@@ -142,43 +150,43 @@ function(add_cutie_test_target)
             ${C_MOCK_DIR}/include
             ${SUBHOOK_DIR}
             "$<$<BOOL:${BUILD_DLFCN}>:${DLFCN_DIR}/src>"
-            ${TEST_INCLUDE_DIRECTORIES}
+            ${ARGS_INCLUDE_DIRECTORIES}
     )
 
     # set build options
-    target_compile_options(${TEST_NAME}
+    target_compile_options(${ARGS_NAME}
         PRIVATE
-            ${TEST_COMPILER_FLAGS}
+            ${ARGS_COMPILER_FLAGS}
             ${COVERAGE_FLAGS}
     )
 
-    target_compile_definitions(${TEST_NAME}
+    target_compile_definitions(${ARGS_NAME}
         PRIVATE
-            ${TEST_COMPILER_DEFINITIONS}
+            ${ARGS_COMPILER_DEFINITIONS}
     )
 
-    target_link_libraries(${TEST_NAME}
+    target_link_libraries(${ARGS_NAME}
         PUBLIC
             gmock_main
             subhook
 	    ${CMAKE_DL_LIBS}
-            ${TEST_LINK_LIBRARIES}
+            ${ARGS_LINK_LIBRARIES}
     )
 
-    target_link_options(${TEST_NAME}
+    target_link_options(${ARGS_NAME}
         PRIVATE
             ${C_MOCK_LINKER_FLAGS}
             ${COVERAGE_FLAGS}
-            ${TEST_LINKER_FLAGS}
+            ${ARGS_LINKER_FLAGS}
     )
 
-    set(TEST_TARGETS ${TEST_TARGETS} ${TEST_NAME} PARENT_SCOPE)
+    set(TEST_TARGETS ${TEST_TARGETS} ${ARGS_NAME} PARENT_SCOPE)
 
     if (DEFINED CUTIE_GTEST_XML)
-      set(TEST_ARGS "--gtest_output=xml:${TEST_NAME}.xml")
+      set(TEST_ARGS "--gtest_output=xml:${ARGS_NAME}.xml")
     endif ()
 
-    add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME} ${TEST_ARGS})
+    add_test(NAME ${ARGS_NAME} COMMAND ${ARGS_NAME} ${TEST_ARGS})
 endfunction()
 
 # Defines the `all_tests` target that runs all tests added with add_cutie_test_target()
