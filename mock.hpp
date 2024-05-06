@@ -174,6 +174,15 @@
     CMOCK_MOCK_FUNCTION##num_params(MockContainer_##func, __CMOCK_STUB__##func, decltype(func)); \
     static_assert(true, "Semicolon required")
 
+#define DECLARE_MOCKABLE_SHARED(func, num_params) \
+    class MockContainer_##func : public MockContainer<MockContainer_##func> { \
+    public: \
+        MockContainer_##func() : MockContainer<MockContainer_##func>((void*)(func), nullptr) {} \
+        explicit MockContainer_##func(void* stub) : MockContainer<MockContainer_##func>((void*)(func), stub) {} \
+        MOCK_METHOD##num_params(__CMOCK_STUB__##func, decltype(func)); \
+    }; \
+    static_assert(true, "Semicolon required")
+
 /********************************************************************
 	@brief Declare an uninitialized Mock Container.
  	  This is useful when declaring the container as a field of a class.
