@@ -37,8 +37,23 @@
 # To clean coverage data, use the `clean_coverage` target.
 #
 cmake_minimum_required(VERSION 3.10)
+
+include(cmake/get_cpm.cmake)
+include(cmake/CPM.cmake)
+
+CPMAddPackage(
+  NAME googletest
+  GITHUB_REPOSITORY google/googletest
+  VERSION 1.13.0
+  OPTIONS
+    "INSTALL_GTEST OFF"
+    "gtest_force_shared_crt ON"
+)
+
 set(CMAKE_CXX_STANDARD 17)
 include(CTest)
+
+set(BUILD_SHARED_LIBS OFF)
 
 ## Functions
 function(verify_variable variable_name)
@@ -108,13 +123,11 @@ function(add_cutie_test_target)
     endif()
 
     ## Dependencies directories
-    set(GOOGLETEST_DIR ${CUTIE_DIR}/googletest)
     set(SUBHOOK_DIR ${CUTIE_DIR}/subhook)
     set(C_MOCK_DIR ${CUTIE_DIR}/C-Mock)
     if(${BUILD_DLFCN})
         set(DLFCN_BIN_DIR ${DLFCN_DIR}/build)
     endif()
-    set(GOOGLETEST_BIN_DIR ${GOOGLETEST_DIR}/build)
     set(SUBHOOK_BIN_DIR ${SUBHOOK_DIR}/build)
 
     # Define test target
@@ -131,8 +144,6 @@ function(add_cutie_test_target)
 
     # Compiling dependencies
     if (NOT DEFINED _CUTIE_DEPENDENCIES_COMPILED)
-        set(INSTALL_GTEST OFF)
-        add_subdirectory(${GOOGLETEST_DIR} ${GOOGLETEST_BIN_DIR} EXCLUDE_FROM_ALL)
         set(SUBHOOK_STATIC ON)
         set(SUBHOOK_TESTS OFF)
         add_subdirectory(${SUBHOOK_DIR} ${SUBHOOK_BIN_DIR} EXCLUDE_FROM_ALL)
@@ -145,8 +156,6 @@ function(add_cutie_test_target)
     target_include_directories(${ARGS_NAME}
         PUBLIC
             ${CUTIE_DIR}
-            ${GOOGLETEST_DIR}/googlemock/include
-            ${GOOGLETEST_DIR}/googletest/include
             ${C_MOCK_DIR}/include
             ${SUBHOOK_DIR}
             "$<$<BOOL:${BUILD_DLFCN}>:${DLFCN_DIR}/src>"
@@ -167,9 +176,9 @@ function(add_cutie_test_target)
 
     target_link_libraries(${ARGS_NAME}
         PUBLIC
-            gmock_main
+            GTest::gmock_main
             subhook
-	          ${CMAKE_DL_LIBS}
+            ${CMAKE_DL_LIBS}
             ${ARGS_LINK_LIBRARIES}
     )
 
