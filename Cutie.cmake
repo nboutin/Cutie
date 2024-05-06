@@ -50,6 +50,12 @@ CPMAddPackage(
     "gtest_force_shared_crt ON"
 )
 
+CPMAddPackage(
+  NAME cmock
+  GITHUB_REPOSITORY nboutin/C-Mock
+  VERSION 0.5.0
+)
+
 set(CMAKE_CXX_STANDARD 17)
 include(CTest)
 
@@ -124,7 +130,6 @@ function(add_cutie_test_target)
 
     ## Dependencies directories
     set(SUBHOOK_DIR ${CUTIE_DIR}/subhook)
-    set(C_MOCK_DIR ${CUTIE_DIR}/C-Mock)
     if(${BUILD_DLFCN})
         set(DLFCN_BIN_DIR ${DLFCN_DIR}/build)
     endif()
@@ -156,7 +161,6 @@ function(add_cutie_test_target)
     target_include_directories(${ARGS_NAME}
         PUBLIC
             ${CUTIE_DIR}
-            ${C_MOCK_DIR}/include
             ${SUBHOOK_DIR}
             "$<$<BOOL:${BUILD_DLFCN}>:${DLFCN_DIR}/src>"
             ${ARGS_INCLUDE_DIRECTORIES}
@@ -177,6 +181,7 @@ function(add_cutie_test_target)
     target_link_libraries(${ARGS_NAME}
         PUBLIC
             GTest::gmock_main
+            C-Mock
             subhook
             ${CMAKE_DL_LIBS}
             ${ARGS_LINK_LIBRARIES}
