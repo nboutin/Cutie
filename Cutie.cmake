@@ -65,6 +65,14 @@ CPMAddPackage(
     "SUBHOOK_TESTS OFF"
 )
 
+CPMAddPackage(
+  NAME dlfcn-win32
+  GITHUB_REPOSITORY dlfcn-win32/dlfcn-win32
+  VERSION 1.3.1
+  OPTIONS
+    "BUILD_SHARED_LIBS OFF"
+)
+
 include(CTest)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -88,14 +96,11 @@ endif ()
 if (WIN32)
   option(USE_DLFCN_WIN32_PACKAGE "Use dlfcn-win32 system package (if false dlfcn is build from source)" FALSE)
   if(${USE_DLFCN_WIN32_PACKAGE})
-    #MSYS2 case (dlfcn package can be installed)
     find_package(dlfcn-win32 REQUIRED)
     set(CMAKE_DL_LIBS dlfcn-win32::dl)
     set(BUILD_DLFCN FALSE)
   else()
     set(CMAKE_DL_LIBS dl)
-    get_filename_component(DLFCN_DIR ${CUTIE_DIR}/dlfcn-win32 REALPATH)
-    set(BUILD_DLFCN TRUE)
   endif()
 endif ()
 
@@ -137,11 +142,6 @@ function(add_cutie_test_target)
       get_filename_component(ARGS_NAME ${ARGS_TEST} NAME_WE)
     endif()
 
-    ## Dependencies directories
-    if(${BUILD_DLFCN})
-        set(DLFCN_BIN_DIR ${DLFCN_DIR}/build)
-    endif()
-
     # Define test target
     add_executable(${ARGS_NAME} ${ARGS_TEST} ${ARGS_SOURCES})
 
@@ -154,18 +154,10 @@ function(add_cutie_test_target)
       set(C_MOCK_LINKER_FLAGS -rdynamic -Wl,--no-as-needed -ldl)
     endif()
 
-    # Compiling dependencies
-    if (NOT DEFINED _CUTIE_DEPENDENCIES_COMPILED)
-        if(${BUILD_DLFCN})
-          add_subdirectory(${DLFCN_DIR} ${DLFCN_BIN_DIR} EXCLUDE_FROM_ALL)
-        endif()
-        set(_CUTIE_DEPENDENCIES_COMPILED 1 PARENT_SCOPE)
-    endif ()
-
     target_include_directories(${ARGS_NAME}
         PUBLIC
             ${CUTIE_DIR}
-            "$<$<BOOL:${BUILD_DLFCN}>:${DLFCN_DIR}/src>"
+            ${dlfcn-win32_SOURCE_DIR}/src
             ${ARGS_INCLUDE_DIRECTORIES}
     )
 
