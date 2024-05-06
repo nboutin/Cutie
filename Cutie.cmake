@@ -56,9 +56,18 @@ CPMAddPackage(
   VERSION 0.5.0
 )
 
-set(CMAKE_CXX_STANDARD 17)
+CPMAddPackage(
+  NAME subhook
+  GITHUB_REPOSITORY Zeex/subhook
+  VERSION 0.8.2
+  OPTIONS
+    "SUBHOOK_STATIC ON"
+    "SUBHOOK_TESTS OFF"
+)
+
 include(CTest)
 
+set(CMAKE_CXX_STANDARD 17)
 set(BUILD_SHARED_LIBS OFF)
 
 ## Functions
@@ -129,11 +138,9 @@ function(add_cutie_test_target)
     endif()
 
     ## Dependencies directories
-    set(SUBHOOK_DIR ${CUTIE_DIR}/subhook)
     if(${BUILD_DLFCN})
         set(DLFCN_BIN_DIR ${DLFCN_DIR}/build)
     endif()
-    set(SUBHOOK_BIN_DIR ${SUBHOOK_DIR}/build)
 
     # Define test target
     add_executable(${ARGS_NAME} ${ARGS_TEST} ${ARGS_SOURCES})
@@ -149,9 +156,6 @@ function(add_cutie_test_target)
 
     # Compiling dependencies
     if (NOT DEFINED _CUTIE_DEPENDENCIES_COMPILED)
-        set(SUBHOOK_STATIC ON)
-        set(SUBHOOK_TESTS OFF)
-        add_subdirectory(${SUBHOOK_DIR} ${SUBHOOK_BIN_DIR} EXCLUDE_FROM_ALL)
         if(${BUILD_DLFCN})
           add_subdirectory(${DLFCN_DIR} ${DLFCN_BIN_DIR} EXCLUDE_FROM_ALL)
         endif()
@@ -161,7 +165,6 @@ function(add_cutie_test_target)
     target_include_directories(${ARGS_NAME}
         PUBLIC
             ${CUTIE_DIR}
-            ${SUBHOOK_DIR}
             "$<$<BOOL:${BUILD_DLFCN}>:${DLFCN_DIR}/src>"
             ${ARGS_INCLUDE_DIRECTORIES}
     )

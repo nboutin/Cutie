@@ -1,6 +1,3 @@
-[submodule "subhook"]
-	path = subhook
-	url = https://github.com/Zeex/subhook.git
 [submodule "dlfcn-win32"]
 	path = dlfcn-win32
 	url = https://github.com/dlfcn-win32/dlfcn-win32
