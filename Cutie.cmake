@@ -260,9 +260,10 @@ function(add_cutie_coverage_gcovr_html_targets)
             EXECUTABLE ctest
             EXCLUDE "${CUTIE_DIR}/*" "/usr/include/*")
     add_custom_target(clean_coverage_gcovr_html
-            rm --recursive --force ${COVERAGE_DIR}
-            COMMAND find -iname "*.gcda" -delete
-            COMMAND find -iname "*.gcno" -delete
+            rm -rf ${COVERAGE_DIR}
+            COMMAND find -iname "'*.gcda'" -delete
+            COMMAND find -iname "'*.gcno'" -delete
+            COMMAND find -iname "'*.gcov'" -delete
             WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
             VERBATIM
             COMMENT "Deleting coverage information. Rebuild after this.")
