@@ -38,8 +38,8 @@
 #
 cmake_minimum_required(VERSION 3.10)
 
-include(cmake/get_cpm.cmake)
-include(cmake/CPM.cmake)
+include(${CUTIE_DIR}/cmake/get_cpm.cmake)
+include(${CUTIE_DIR}/cmake/CPM.cmake)
 
 CPMAddPackage(
   NAME googletest
@@ -238,7 +238,7 @@ endfunction()
 # The collected coverage report resides in the coverage/ directory under the project's directory.
 # Function has no parameters
 function(add_cutie_coverage_gcovr_targets)
-    include(${CUTIE_DIR}/inc/CodeCoverage.cmake)
+    include(${CUTIE_DIR}/cmake/CodeCoverage.cmake)
     set(COVERAGE_DIR coverage_gcovr_xml)
     setup_target_for_coverage_gcovr_xml(
             NAME ${COVERAGE_DIR}
@@ -263,7 +263,7 @@ endfunction()
 # The collected coverage report resides in the coverage/ directory under the project's directory.
 # Function has no parameters
 function(add_cutie_coverage_gcovr_html_targets)
-    include(${CUTIE_DIR}/inc/CodeCoverage.cmake)
+    include(${CUTIE_DIR}/cmake/CodeCoverage.cmake)
     set(COVERAGE_DIR coverage_gcovr_html)
     setup_target_for_coverage_gcovr_html(
             NAME ${COVERAGE_DIR}
