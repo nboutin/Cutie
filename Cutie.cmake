@@ -68,7 +68,7 @@ CPMAddPackage(
 CPMAddPackage(
   NAME dlfcn-win32
   GITHUB_REPOSITORY dlfcn-win32/dlfcn-win32
-  VERSION 1.3.1
+  VERSION 1.4.1
   OPTIONS
     "BUILD_SHARED_LIBS OFF"
 )
