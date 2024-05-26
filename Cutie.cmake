@@ -169,7 +169,7 @@ function(add_cutie_test_target)
         PUBLIC
             gmock_main
             subhook
-	    ${CMAKE_DL_LIBS}
+	          ${CMAKE_DL_LIBS}
             ${ARGS_LINK_LIBRARIES}
     )
 
