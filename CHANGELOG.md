@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 
 * subhook to 0.9.0
 * dlfcn-win32 to 1.4.1
+* GoogleTest to 1.14.0
 
 ## 1.3.0 - 2024-05-06
 
