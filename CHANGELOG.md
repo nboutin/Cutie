@@ -4,10 +4,23 @@ All notable changes to this project will be documented in this file.
 * The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 * This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
-## 1.3.0 - 2024-05-06
+## 1.4.0 - 2024-05-26
+
 **Added**
-- Declare mockable shared
-- Add optional parameter NAME to add_cutie_test_target
+
+* Use CPM instead of Git submodules
+
+**Changed**
+
+* subhook to 0.9.0
+* dlfcn-win32 to 1.4.1
+
+## 1.3.0 - 2024-05-06
+
+**Added**
+
+* Declare mockable shared
+* Add optional parameter NAME to add_cutie_test_target
 
 **Changed**
 - Rework add_cutie_test_target
