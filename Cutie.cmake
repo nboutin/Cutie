@@ -58,8 +58,8 @@ CPMAddPackage(
 
 CPMAddPackage(
   NAME subhook
-  GITHUB_REPOSITORY Zeex/subhook
-  VERSION 0.8.2
+  GITHUB_REPOSITORY nboutin/subhook
+  VERSION 0.9.0
   OPTIONS
     "SUBHOOK_STATIC ON"
     "SUBHOOK_TESTS OFF"
