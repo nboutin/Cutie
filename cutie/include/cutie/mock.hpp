@@ -41,11 +41,11 @@
 
 		TEST(MYMODULE, fopen_fails) {
 			INSTALL_EXPECT_CALL(fopen, _, _, _).WillRepeatedly(Return(-1));
-			
+
 			INSTALL_MOCK(fclose);
 			CUTIE_ON_CALL(fclose, NotNull()).WillByDefault(Return(-1));
 			CUTIE_EXPECT_CALL(fclose, _).WillOnce(Return(0));
-			
+
 			EXPECT_EQ(MYMODULE_calculate(), -1);
 		}
 
@@ -130,22 +130,22 @@
  	~~~~~~~~~~~~~~~~~~~~~~~~
  	The INSTALL_HOOK macro creates and initialized a Mock Container (an internal implementation class that allows
  	mocking). The container is basically a variable. It's pretty much like defining:
- 	
+
  	    MyExmapleMockContainer __cmock__my_example_container(... parameters ...);
- 	   
+
  	Most of the time, you will use INSTALL_EXPECT_CALL, which already declares and initialized the container, or
  	CUTIE_EXPECT_CALL in conjunction with INSTALL_HOOK that delares and initialized the container.
 
  	Sometimes you will want to split the container's declaration and initialization to different places.
  	For that, CUTIE_UNINITIALIZED_CONTAINER and CUTIE_INITIALIZE_CONTAINER should be used.
  	Example:
- 	
+
  	    CUTIE_UNINITIALIZED_CONTAINER(my_func);
  	    CUTIE_INITIALIZE_CONTAINER(my_func);
- 	    
+
  	This is pretty useful if you want to declare the Mock Container as a class field, and initialize it in a function
  	or in the constructor.
- 
+
  	Ellipsis
 	~~~~~~~~
 	CMock doesn't support mocking functions with ellipsis.
@@ -155,7 +155,7 @@
 #ifndef CUTIE_MOCK_HPP
 #define CUTIE_MOCK_HPP
 
-#include "inc/mock_container.hpp"
+#include "cutie/private/mock_container.hpp"
 
 /********************************************************************
 	@brief Declare a function as mockable. Must be called once for
@@ -211,7 +211,7 @@
 /********************************************************************
 	@brief The equivalent of GMock's EXPECT_CALL.
  		   Use in conjunction with INSTALL_MOCK.
- 		   
+
  		   The difference between GMock's EXPECT_CALL and CUTIE_EXPECT_CALL is:
 
 				EXPECT_CALL(myfunc(1, 2))
@@ -233,7 +233,7 @@
 /********************************************************************
 	@brief The equivalent of GMock's ON_CALL.
  		   Use in conjunction with INSTALL_MOCK.
- 		   
+
  		   The difference between GMock's ON_CALL and ON_CALL is:
 
 				ON_CALL(myfunc(1, 2))

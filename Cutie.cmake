@@ -78,6 +78,8 @@ include(CTest)
 set(CMAKE_CXX_STANDARD 17)
 set(BUILD_SHARED_LIBS OFF)
 
+add_subdirectory(${CUTIE_DIR}/cutie ${CMAKE_BINARY_DIR}/cutie)
+
 ## Functions
 function(verify_variable variable_name)
     if (NOT DEFINED ${variable_name})
@@ -156,7 +158,6 @@ function(add_cutie_test_target)
 
     target_include_directories(${ARGS_NAME}
         PUBLIC
-            ${CUTIE_DIR}
             ${dlfcn-win32_SOURCE_DIR}/src
             ${ARGS_INCLUDE_DIRECTORIES}
     )
@@ -175,6 +176,7 @@ function(add_cutie_test_target)
 
     target_link_libraries(${ARGS_NAME}
         PUBLIC
+            cutie
             GTest::gmock_main
             C-Mock
             subhook

@@ -63,7 +63,7 @@
 #ifndef CUTIE_HOOK_HPP
 #define CUTIE_HOOK_HPP
 
-#include "inc/c_scoped_hook.hpp"
+#include "cutie/private/c_scoped_hook.hpp"
 
 /********************************************************************
 	@brief Declare a function as hookable. Must be called once for

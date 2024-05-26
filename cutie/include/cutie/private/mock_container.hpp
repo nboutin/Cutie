@@ -8,8 +8,8 @@
 #ifndef CUTIE_MOCK_CONTAINER_HPP
 #define CUTIE_MOCK_CONTAINER_HPP
 
-#include <cmock/cmock.h>
-#include <hook.hpp>
+#include "cmock/cmock.h"
+#include "cutie/hook.hpp"
 
 /********************************************************************
 	A base class for CMock containers.
